@@ -15,6 +15,7 @@ const formValidation = document.getElementById("form");
 const closeModalBtn = document.querySelector(".close");
 const textField = document.querySelector(".text-label");
 const submitBtn = document.getElementById("btn-submit");
+const submitBtnSuccess = document.getElementById("btn-SuccessSubmit")
 const submitSuccess = document.querySelector(".submitSuccessMsg");
 const firstName = document.getElementById("first");
 const firstNameError = document.getElementById("firstNameError");
@@ -58,6 +59,7 @@ closeModalBtn.addEventListener("click", closeModal);
 let modalReset = false;
 function launchModal() {
   modalbg.style.display = "block";
+  submitBtnSuccess.style.display = "none";
   if (modalReset === true) {
     modalResetting();
   }
@@ -66,6 +68,9 @@ function launchModal() {
 // close modal form
 function closeModal() {
   modalbg.style.display = "none";
+  if (modalReset === true) {
+    modalResetting();
+  }
 }
 
 // form validation
@@ -202,11 +207,14 @@ function cguValidation() {
     cguError.innerText = errorCGU;
     isCguValid = false;
   }
+  // enable or disable submitBtn if all the form data are valid and cgu are checked
+  submitBtnState();
 }
 
 // enable submit button
 // submit btn disabled by default
 submitBtn.disabled = true;
+let allFormDataValid = false;
 // if all isValid = true btn is enable
 document.querySelectorAll(".formData").forEach((item) => {
   item.addEventListener("input", () => {
@@ -216,15 +224,22 @@ document.querySelectorAll(".formData").forEach((item) => {
       isEmailValid &&
       isBirthDateValid &&
       isQuantityValid &&
-      isTournamentValid &&
-      isCguValid
+      isTournamentValid
     ) {
-      submitBtn.disabled = false;
-    } else {
-      submitBtn.disable = true;
-    }
+      allFormDataValid = true;
+    } else { allFormDataValid = false; }
+    submitBtnState();
   });
 });
+
+// enable or disable submitBtn if all the form data are valid and cgu are checked
+function submitBtnState() {
+  if (allFormDataValid && isCguValid) {
+  submitBtn.disabled = false;
+} else {
+  submitBtn.disabled = true;
+}
+}
 
 // form validation
 // listen submit btn
@@ -246,31 +261,61 @@ formValidation.addEventListener("submit", function (event) {
     });
   }
   textField.style.display = "none";
-  submitBtn.value = "Fermer";
-  submitSuccess.style.paddingTop = "100%";
-  submitSuccess.style.paddingBottom = "100%";
+  submitBtn.style.display = "none"
+  submitBtnSuccess.style.display = "block";
+  submitSuccess.style.display = "block";
+  submitSuccess.style.paddingTop = "85%";
+  submitSuccess.style.paddingBottom = "85%";
   submitSuccess.innerText = "Merci pour votre inscription.";
   submitSuccess.style.textAlign = "center";
   modalReset = true;
-  submitBtn.addEventListener("click", closeModal);
+  submitBtnSuccess.addEventListener("click", closeModal);
 });
 
 // reset form
 function modalResetting() {
-  formData.forEach((item) => {
-    item.style.display = "block";
-  });
-  submitBtn.disabled = true;
-  textField.style.display = "block";
-  submitSuccess.style.display = "none";
-  submitBtn.value = "C'est parti";
-  (firstName.value = ""),
-  (lastName.value = ""),
-  (email.value = ""),
-  (birthDate.value = undefined),
-  (quantity.value = undefined),
-  (cgu.checked = false),
-  tournamentLocation.forEach((item) => {
-    item.checked = false;
-  });
+  if (modalReset === true) {
+    formData.forEach((item) => {
+      item.style.display = "block";
+    });
+    submitBtn.style.display = "block"
+    submitBtn.disabled = true;
+    textField.style.display = "block";
+    submitSuccess.style.display = "none";
+    submitBtn.value = "C'est parti";
+    firstName.value = "",
+    lastName.value = "",
+    email.value = "",
+    birthDate.value = null,
+    quantity.value =  null,
+    cgu.checked = false,
+    tournamentLocation.forEach((item) => {
+      item.checked = false;
+    });
+    //isValid false after reset
+    isFirstNameValid = false;
+    isLastNameValid = false;
+    isEmailValid = false;
+    isBirthDateValid = false;
+    isQuantityValid = false;
+    isTournamentValid = false;
+    isCguValid = false;
+    //modalReset = false after reset
+    modalReset = false;
+    // launch validation to display errors after reset
+    firstNameValidation();
+    lastNameValidation();
+    emailValidation();
+    quantityValidation()
+    // if because cant launch a function with event outside the function
+    if (isBirthDateValid === false) {
+      birthDateError.innerText = errorBirthDate;
+    }
+    if (isTournamentValid === false) {
+      locationError.innerText = errorLocation;
+    }
+    if (isCguValid === false) {
+      cguError.innerText = errorCGU;
+    }
+  }    
 }
